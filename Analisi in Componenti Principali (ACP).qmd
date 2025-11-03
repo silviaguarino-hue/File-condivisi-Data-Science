@@ -1,0 +1,135 @@
+---
+title: "Esercitazione Analisi in Componenti Principali (ACP)"
+format: html
+editor: visual
+---
+
+# IL MIO REPORT
+
+## Analisi in Componenti Principali (ACP)
+
+L'Analisi in Componenti Principali (ACP) è una tecnica di riduzione della dimensionalità di un fenomeno oggetto di indagine e riassume l'informazione contenuta in molte variabili in un numero minore di componenti che spiegano la maggior parte della variabilità dei dati.
+
+L'obiettivo dell'Analisi in Componenti Principali (ACP) è quindi semplificare i dati mantenendo il più possibile la loro variabilità.
+
+#### Creazione della Matrice di Correlazione e del suo grafico
+
+```{r}
+X<-as.matrix(AUTO) #si utilizza questo comando per impostare il nome del dataset e una volta impostato lo si troverà a sinistra della freccia
+n<-nrow(X) #si utilizza questo comando per vedere il numero delle righe contenute nel dataset
+p<-ncol(X) #si utilizza questo comando per vedere il numero di colonne contenute nel dataset
+
+medie<-colMeans(X) #si utilizza questo comando per calcolare la Media delle colonne presenti nel dataset
+M<-matrix(rep(medie,15),15,10, byrow = TRUE) #si utilizza questo comando per riempire (rep) e crere la matrice delle medie (matrix) mantenendo la dimensionalità naturale del dataset
+Xc<-X-M #si utilizza questo comando per la centratura dei dati del dataset andando a eliminare gli scarti che si discostano dalla media delle colonne, ma può essere effettuata solo se le matrici hanno la stessa dimensione. Si può fare attraverso il comando scale(nomedataset, TRUE) e serve anche per calcolare la Deviazione Standard
+
+Cod <-t(Xc)%*%Xc #si utilizza questo comando per calcolare la matrice delle Codevianze moltiplicando la matrice centrata trasposta per la matrice centrata creando sia la matrice delle Codevianze sia la matrice delle Devianze e si può calcolare anche attraverso il comando crossprod. Il simbolo %*% si usa per le moltiplicazioni tra matrici
+
+Xcn<-(X-M)*(1/sqrt(15-1)) #si utilizza questo comando per creare una matrice centrata che tenga conto della numerosità del campione del dataset per creare la matrice della Varianza. L'1 indica il grado di libertà cioè che al netto delle osservazioni, se viene meno una sola variabile, il risultato non cambia
+Cov<-t(Xcn)%*%Xcn #si utilizza questo comando per creare la matrice della Covarianza moltiplicando la matrice centrata trasposta per la matrice centrata, tenendo presente che entrambe tengono conto della numerosità. Si può calcolare anche attraverso il comando crossprod
+
+sigma<-apply(X,2,sd) #si utilizza questo comando per calcolare la Deviazione Standard per tutte le colonne della matrice come indica il numero 2, se invece si volesse calcolare la Deviazione Standard per tutte le righe della matrice si dovrebbe inserire il numero 1
+SD<-matrix(1,15,1) #si utilizza questo comando per visionare la struttura della matrice della Deviazione Standard e come deve essere riempita, tenendo presente che si tratta di un vettore e non di una matrice
+SD<- SD%*%sigma #si utilizza questo comando per sostituire alla struttura del vettore precedente i valori caratterianti la matrice della Deviazione Standard
+Z<-Xcn*(1/SD) #si utilizza questo comando per calcolare la Standardizzazione
+R<- t(Z)%*%Z #si utilizza questo comando per calcolare la matrice di Correlazione attraverso la moltiplicazione della matrice standardizzata trasposta per la matrice standardizzata. Si può calcolare anche attraverso il comando corr(nomedataset) evitando tutta la serie di passaggi precedenti
+R <- round(R,digits = 3) #si utilizza questo comando per arrotondare e prendere il numero di cifre decimali che si desiderano
+
+library(corrplot)
+corrplot(R, is.corr = FALSE,method="number") #si utiliza questo comando per creare il grafico della matrice di Correlazione
+corrplot(R, method = "circle", type = "lower", order = "AOE", col = colorRampPalette(c("#BB4444","#EE9988","#FFFFFF","#77AADD","#4477AA"))(200), addCoef.col = "black",tl.col = "black", tl.srt = 45, diag = FALSE)
+
+
+```
+
+#### Descrizione e interpretazione della Matrice di Correlazione
+
+Bisogna estrarre gli autovalori e gli autovettori per poter effettuare l'Analisi in Componenti Principali (ACP). Si parte dall'estrazione degli autovalori:
+
+```{r}
+eig <- eigen(R) #si utiliza questo comando per raccogliere gli autovalori e gli autovettori presenti all'interno delle matrici
+lambda<- eig$values #si utiliza questo comando per vedere esclusivamente gli autovalori
+lambda #si utiliza questo comando per vedere singolarmente tutti gli autovalori
+sum(lambda) #si utiliza questo comando per vedere quanti sono in totale gli autovalori
+```
+
+Successivamente si prosegue a capire quante sono le componenti principali da estrarre e lo si può fare attraverso due metodi:
+
+1.  Si scelgono le componenti principali in base a quanti sono gli autovalori, quindi le componenti principali avranno la stessa numerosità di lambda.
+2.  Si calcolano sia la varianza sia la media estratta.
+
+```{r}
+varTOT <- sum(lambda)
+varEXP <- lambda/varTOT*100
+varEXP #si utiliza questo comando per calcolare la variabilità di ogni colonna e rilascia come risultato la variabilità spiegata di ogni singola componente
+varEXP <- round(varEXP, digits=3) #si utiliza questo comando per arrotondare
+var_cum <- cumsum(varEXP) #si utiliza questo comando per calcolare la varianza cumulata delle componenti da estrarre
+var_cum #si utiliza questo comando per calcolare le percentuali cumulate, per convenzione ci si ferma alla variabile che raggiunge circa il 70%
+```
+
+Si procede a creare il grafico attraverso quello che viene chiamato "Metodo del salto". Ci si troverà di fronte a uno scree PLOT che, dopo la terza componente, assumerà un orientamento tendenzialmente orizzontale perchè i salti più evidenti si avranno tra la prima e la terza componente.
+
+```{r}
+barplot(lambda, main = "Scree-Plot degli autovalori", 
+xlab = "n. componenti", ylab = "lambda",col = "blue2")
+lines(x = lambda, y=NULL, type="b", pch=19, col = "red") #con la dicitura pch si indica la grandezza dei puntini, mentre con il comando type=b siindica la linea tratteggiata
+```
+
+#### Estrazione dei Factors Patterns e creazione dei Cerchi delle correlazioni
+
+L'estrazione dei Factor Patterns è il primo passaggio da effettuare se si vuole comprendere come si dispongono le diverse variabili del dataset sulle componenti principali.
+
+Si noterà che:
+
+1.  Le correlazioni più alte sono presenti sulla prima componente principale e riguardano: "velocità", "cavalli", "cilindrata" e "peso" proprio per questo motivo, scegliendo di dare un nome alla prima componente che riassuma le componenti principali, si potrebbe optare per "potenza".
+2.  Le correlazioni più alte sono presenti sulla seconda componente principale sono negative e riguarderanno: "lunghezza" e "larghezza" proprio per questo motivo, scegliendo di dare un nome alla prima componente che riassuma le componenti principali, si potrebbe optare per "rapporto consumo-dimensioni".
+3.  Le correlazioni più alte sono presenti sulla terza componente principale e riguardano: "consumo urbano", "consumo su strada" e "affidabilità" proprio per questo motivo, scegliendo di dare un nome alla prima componente che riassuma le componenti principali, si potrebbe optare per "confort".
+
+```{r}
+u<- eig$vectors #si utiliza questo comando per visionare gli autovettori
+CP<-Z%*%u #si utiliza questo comando per moltiplicare la matrice standardizzata con gli autovettori
+FP <- round(cor(X, CP), 3) #si utiliza questo comando per trovare le correlazioni tra la matrice e le componenti principali estratte, si trovano quindi i Factor Patterns
+FP3ax<-FP[,1:3] #si utiliza questo comando per creare una tabella con le componenti principali e le saturaioni delle variabili su ogni singola componente principale
+FP3ax
+```
+
+Si procede alla creazione del cerchio delle correlazioni CP1, CP2 e CP3.
+
+```{r}
+# Cerchio delle correlazioni CP1 e CP2
+library(plotrix)
+par()$pty; par(pty="s")
+plot(FP[,1:2],xlab="CP1", ylab="CP2",type="n", xlim=c(-1,1),ylim=c(-1,1))
+variabili<-row.names(FP)
+text(FP[,1],FP[,2], labels=variabili)
+abline(h=0,v=0)
+draw.circle(0,0,c(-1,0,1),border="purple")
+for (j in 1:p)
+arrows (0,0,FP[j,1],FP[j,2], length=0.1)
+```
+
+Come si può notare dal cerchio delle correlazioni sovrastante, CP1 e CP2 sono ortogonali e indipendenti.
+
+```{r}
+#Cerchio correlazioni CP1 e CP3
+par()$pty; par(pty="s")
+plot(FP[,1:3],xlab="CP1", ylab="CP3",type="n", xlim=c(-1,1),ylim=c(-1,1))
+variabili<-row.names(FP)
+text(FP[,1],FP[,3], labels=variabili)
+abline(h=0,v=0)
+draw.circle(0,0,c(-1,0,1),border="purple")
+for (j in 1:p)
+arrows (0,0,FP[j,1],FP[j,3], length=0.1)
+```
+
+```{r}
+#Cerchio correlazioni CP2 e CP3
+par()$pty; par(pty="s")
+plot(FP[,2:3],xlab="CP2", ylab="CP3",type="n", xlim=c(-1,1),ylim=c(-1,1))
+variabili<-row.names(FP)
+text(FP[,2],FP[,3], labels=variabili)
+abline(h=0,v=0)
+draw.circle(0,0,c(-1,0,1),border="purple")
+for (j in 1:p)
+arrows (0,0,FP[j,2],FP[j,3], length=0.1)
+```
