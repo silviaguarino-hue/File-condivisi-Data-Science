@@ -1,0 +1,178 @@
+---
+title: "Teoria e comandi"
+format: html
+editor: visual
+---
+
+# Teoria e Comandi
+
+Su R tutto ciò che viene preceduto da **\#** è un **commento**, nessun comando sarà mai preceduto da simboli.
+
+#### Creare una tabella di frequenza
+
+```{r}
+table(...) 
+```
+
+#### Sintesi numeriche
+
+1.  **Media**
+
+```{r}
+mean(x$y)
+```
+
+2.  **Mediana**
+
+```{r}
+median(x$y)
+```
+
+3.  **Quantili di diverso ordine**
+
+```{r}
+quantili(variabile, ordinequantile)
+```
+
+4.  **Varianza**
+
+```{r}
+var(x$y)
+```
+
+5.  **Deviazione Standard**
+
+```{r}
+sd(x$y)
+```
+
+6.  **Funzione di ripartizione**
+
+```{r}
+p <- 
+```
+
+Si tratta del prefisso per creare una funzione di ripartizione
+
+#### Per i vettori
+
+1.  **Creare un vettore**
+
+```{r}
+nomevettore = C(valori del vettore)
+```
+
+Il simbolo = è un simbolo di `assegnazione`, mentre la C sta per `chain of values`. Si va a costruire una **distribuzione unitaria**. Il comando sottostante serve invece se si vuole sapere la lunghezza di un vettore.
+
+```{r}
+length(nomevettore)
+```
+
+2.  **Selezionare un vettore**
+
+```{r}
+nomevettore[Position(.)]
+```
+
+Questo comando si usa per selezionare un solo vettore e si chiama **elemento di posizione**.
+
+```{r}
+nomevettore[da:a]
+```
+
+Questo comando si usa per selezionare una serie di vettori consecutivi.
+
+```{r}
+nomevettore[c(pos1,pos2,...,posn)]
+```
+
+Questo comando si usa per selezionare una serie di vettori non consecutivi.
+
+```{r}
+table(condizione) oppure sum(condizione)
+```
+
+Questo comando si usa per sapere quanti elementi di un vettore rispettano una data condizione.
+
+```{r}
+which(condition)
+```
+
+Questo comando si usa per sapere quali elementi di un vettore rispettano una data condizione.
+
+#### Per le variabili
+
+```{r}
+head(x)
+```
+
+Questo comando mostra le prime righe del dataset.
+
+```{r}
+dim(x)
+```
+
+Questo comando restituisce le dimensioni del dataset.
+
+```{r}
+nomeoggetto$nomevariabile
+```
+
+Questo comando si usa per selezionare una variabile usando il suo nome.
+
+```{r}
+nomeoggetto[,numerocolonna]
+```
+
+Questo comando si usa per selezionare una variabile usando l'indicatore della colonna che occupa. Non inserendo nulla a sinistra della virgola indica la selezione di tutte le righe.
+
+```{r}
+d <- 
+```
+
+Si tratta del prefisso per creare una **distribuzione di probabilità** per variabili discrete oppure una **funzione di densità** per variabili continue.
+
+#### Rappresentazioni grafiche
+
+1.  **Istogramma**
+
+```{r}
+hist(x)
+```
+
+Si usa questo comando per creare il grafico di caratteri quantitativi continui.
+
+```{r}
+main="Nuovo titolo"
+```
+
+Questo comando si usa per modificare il titolo.
+
+```{r}
+xlab="nome asse", ylab="nome asse"
+```
+
+Questi comandi si usano per modificare le etichette degli assi.
+
+```{r}
+lwd: spessore della linea 
+lty: tratto continuo, tratteggiata, tratto-punto..
+```
+
+Questi comandi si usano per modificare lo spessore della linea e il suo tratto.
+
+2.  **Barplot**
+
+```{r}
+barplot(table(x))
+```
+
+Si usa lo stesso comando sia per caratteri qualitativi sconnessi sia per caratteri qualitativi ordinati.
+
+3.  **Grafico a torta**
+
+```{r}
+pic(x)
+```
+
+Si usa lo stesso comando sia per caratteri qualitativi sconnessi sia per caratteri qualitativi ordinati.
